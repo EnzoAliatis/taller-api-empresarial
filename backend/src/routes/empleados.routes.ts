@@ -1,10 +1,40 @@
-const express= require('express'); 
-const router=express.Router(); 
-const empleado=require('../controllers/empleados.controllers'); 
+import { Router } from 'express';
+import type { EmpleadoController } from '../controllers/empleados.controllers.js';
+import {
+  actualizarEmpleadoSchema,
+  crearEmpleadoSchema,
+  empleadoIdParamSchema,
+} from '../dtos/empleado.dto.js';
+import { validar } from '../middlewares/validar.middleware.js';
 
-router.get('/empleados',empleado.getEmpleado); 
-router.post('/empleados', empleado.addEmpleado); 
-router.put('/empleados', empleado.updateEmpleado); 
-router.delete('/empleados', empleado.deleteEmpleado); 
+export const crearEmpleadosRouter = (empleado: EmpleadoController): Router => {
+  const router = Router();
 
-module.exports=router;
+  router.get('/empleados', empleado.getEmpleado);
+
+  router.get(
+    '/empleados/:id',
+    validar({ params: empleadoIdParamSchema }),
+    empleado.getEmpleadoPorId,
+  );
+
+  router.post(
+    '/empleados',
+    validar({ body: crearEmpleadoSchema }),
+    empleado.addEmpleado,
+  );
+
+  router.patch(
+    '/empleados/:id',
+    validar({ params: empleadoIdParamSchema, body: actualizarEmpleadoSchema }),
+    empleado.updateEmpleado,
+  );
+
+  router.delete(
+    '/empleados/:id',
+    validar({ params: empleadoIdParamSchema }),
+    empleado.deleteEmpleado,
+  );
+
+  return router;
+};
