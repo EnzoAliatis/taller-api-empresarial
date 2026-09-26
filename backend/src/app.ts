@@ -27,6 +27,13 @@ const empleadoController = new EmpleadoController(empleadoRepository);
 //routes
 app.use('/api/v1', crearEmpleadosRouter(empleadoController));
 
+//demo: tumba el proceso para ver cómo PM2 lo vuelve a levantar
+app.get('/api/v1/crash', (_req, res) => {
+  console.error(`💥 [Crash]: proceso ${process.pid} terminado a propósito`);
+  res.status(200).json({ mensaje: `Proceso ${process.pid} terminado` });
+  setTimeout(() => process.exit(1), 100);
+});
+
 //interceptores: siempre al final, después de las rutas
 app.use(rutaNoEncontrada);
 app.use(manejadorErrores);

@@ -6,7 +6,7 @@ export const connectDatabase = async (): Promise<void> => {
   const MONGO_URI = 'mongodb+srv://maestria:maestria@maestria-mongo.wrsshws.mongodb.net/?appName=maestria-mongo';
   try {
     await mongoose.connect(MONGO_URI);
-    console.log('🔄 [Database]: Conexión exitosa a MongoDB');
+    console.log('🔄 [Database]: Conexión exitosa a MongoDB ATLAS');
   } catch (error) {
     console.error('❌ Error crítico al conectar a la base de datos:', error);
     process.exit(1);
