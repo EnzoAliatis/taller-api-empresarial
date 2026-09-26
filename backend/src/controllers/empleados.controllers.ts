@@ -12,7 +12,7 @@ export class EmpleadoController {
 
   getEmpleado = async (_req: Request, res: Response): Promise<void> => {
     const empleados = await this.repositorio.listar();
-    res.json(exito(empleados));
+    res.status(200).json(exito(empleados));
   };
 
   getEmpleadoPorId = async (
@@ -27,12 +27,12 @@ export class EmpleadoController {
       return;
     }
 
-    res.json(exito(empleado));
+    res.status(200).json(exito(empleado));
   };
 
   addEmpleado = async (req: Request, res: Response): Promise<void> => {
     const empleado = await this.repositorio.crear(req.body);
-    res.json(exito(empleado));
+    res.status(201).json(exito(empleado));
   };
 
   updateEmpleado = async (
@@ -47,7 +47,7 @@ export class EmpleadoController {
       return;
     }
 
-    res.json(exito(empleado));
+    res.status(200).json(exito(empleado));
   };
 
   deleteEmpleado = async (
@@ -62,6 +62,6 @@ export class EmpleadoController {
       return;
     }
 
-    res.json(exito({ id }));
+    res.status(200).json(exito({ id }));
   };
 }

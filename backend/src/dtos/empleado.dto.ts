@@ -7,6 +7,9 @@ import { z } from 'zod';
 
 const ID_MONGO = /^[0-9a-fA-F]{24}$/;
 
+/** Solo letras (incluye tildes, ñ y ü) separadas por espacios simples. */
+const SOLO_LETRAS = /^\p{L}+(?: \p{L}+)*$/u;
+
 /** Valida el `:id` de la URL: debe ser un ObjectId bien formado. */
 export const empleadoIdParamSchema = z.object({
   id: z
@@ -20,17 +23,20 @@ export const crearEmpleadoSchema = z.object({
     .string('El nombre es obligatorio')
     .trim()
     .min(3, 'El nombre debe tener al menos 3 caracteres')
-    .max(80, 'El nombre no puede superar los 80 caracteres'),
+    .max(80, 'El nombre no puede superar los 80 caracteres')
+    .regex(SOLO_LETRAS, 'El nombre solo puede contener letras y espacios'),
   cargo: z
     .string('El cargo es obligatorio')
     .trim()
     .min(3, 'El cargo debe tener al menos 3 caracteres')
-    .max(80, 'El cargo no puede superar los 80 caracteres'),
+    .max(80, 'El cargo no puede superar los 80 caracteres')
+    .regex(SOLO_LETRAS, 'El cargo solo puede contener letras y espacios'),
   departamento: z
     .string('El departamento es obligatorio')
     .trim()
     .min(2, 'El departamento debe tener al menos 2 caracteres')
-    .max(80, 'El departamento no puede superar los 80 caracteres'),
+    .max(80, 'El departamento no puede superar los 80 caracteres')
+    .regex(SOLO_LETRAS, 'El departamento solo puede contener letras y espacios'),
   sueldo: z
     .number('El sueldo es obligatorio y debe ser numérico')
     .positive('El sueldo debe ser un número positivo'),

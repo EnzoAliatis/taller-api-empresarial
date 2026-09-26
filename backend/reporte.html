@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reporte Artillery</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<style>
+  body { font-family: system-ui, sans-serif; margin: 0 auto; max-width: 1100px; padding: 24px 16px; color: #1f2937; background: #f9fafb; }
+  h1 { margin-bottom: 4px; } .sub { color: #6b7280; margin-top: 0; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin: 20px 0; }
+  .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px; }
+  .card .v { font-size: 28px; font-weight: 700; } .card .l { color: #6b7280; font-size: 13px; }
+  .graf { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+  table { width: 100%; border-collapse: collapse; background: #fff; }
+  th, td { border: 1px solid #e5e7eb; padding: 8px; text-align: right; } th:first-child, td:first-child { text-align: left; }
+  th { background: #f3f4f6; } .ok { color: #047857; font-weight: 700; } .fail { color: #b91c1c; font-weight: 700; }
+</style>
+</head>
+<body>
+<h1>Reporte de estrés — Artillery</h1>
+<p class="sub">Ejecución: 25/9/2026, 7:21:11 p. m. · Duración: 50 s · Archivo: reporte.json</p>
+
+<div class="cards">
+  <div class="card"><div class="v">2150</div><div class="l">http.requests</div></div>
+  <div class="card"><div class="v">1075</div><div class="l">http.codes.201 (válidos)</div></div>
+  <div class="card"><div class="v">1075</div><div class="l">http.codes.400 (rechazo Zod)</div></div>
+  <div class="card"><div class="v">2 ms</div><div class="l">http.response_time.p99</div></div>
+  <div class="card"><div class="v">0.00 %</div><div class="l">Tasa de error (0)</div></div>
+  <div class="card"><div class="v">1075/1075</div><div class="l">VUsers completados</div></div>
+</div>
+
+<h2>Verificación del SLA (ensure)</h2>
+<table>
+  <tr><th>Criterio</th><th>Umbral</th><th>Obtenido</th><th>Resultado</th></tr>
+  <tr><td>http.response_time.p99</td><td>&lt; 200 ms</td><td>2 ms</td><td><span class="ok">✔ OK</span></td></tr>
+  <tr><td>maxErrorRate</td><td>&lt; 1 %</td><td>0.00 %</td><td><span class="ok">✔ OK</span></td></tr>
+  <tr><td>201 = 400 (cada payload corrupto rechazado)</td><td>iguales</td><td>1075 / 1075</td><td><span class="ok">✔ OK</span></td></tr>
+</table>
+
+<h2>Latencia (ms)</h2>
+<table>
+  <tr><th>Métrica</th><th>min</th><th>p50</th><th>p95</th><th>p99</th><th>max</th><th>media</th></tr>
+  <tr><td>http.response_time (total)</td><td>0</td><td>1</td><td>2</td><td>2</td><td>6</td><td>1</td></tr>
+  <tr><td>http.response_time.2xx</td><td>0</td><td>1</td><td>2</td><td>3</td><td>6</td><td>1.4</td></tr>
+  <tr><td>http.response_time.4xx</td><td>0</td><td>0</td><td>1</td><td>1</td><td>6</td><td>0.5</td></tr>
+</table>
+
+<h2>Evolución en el tiempo</h2>
+<div class="graf"><canvas id="lat"></canvas></div>
+<div class="graf"><canvas id="rate"></canvas></div>
+<div class="graf"><canvas id="codes"></canvas></div>
+
+<script>
+const serie = [{"t":8,"rate":10,"c201":45,"c400":40,"p50":1,"p95":2,"p99":2,"max":2},{"t":18,"rate":10,"c201":50,"c400":50,"p50":1,"p95":2,"p99":2,"max":2},{"t":29,"rate":39,"c201":192,"c400":171,"p50":1,"p95":2,"p99":2,"max":4},{"t":39,"rate":64,"c201":318,"c400":306,"p50":1,"p95":2,"p99":2,"max":6},{"t":49,"rate":88,"c201":438,"c400":427,"p50":1,"p95":2,"p99":2,"max":6},{"t":50,"rate":73,"c201":32,"c400":81,"p50":1,"p95":2,"p99":2,"max":3}];
+const etiquetas = serie.map((p) => p.t + ' s');
+const opciones = (titulo, eje) => ({
+  responsive: true,
+  plugins: { title: { display: true, text: titulo } },
+  scales: { y: { beginAtZero: true, title: { display: true, text: eje } }, x: { title: { display: true, text: 'Tiempo transcurrido' } } },
+});
+new Chart(document.getElementById('lat'), {
+  type: 'line',
+  data: { labels: etiquetas, datasets: [
+    { label: 'p50', data: serie.map((p) => p.p50) },
+    { label: 'p95', data: serie.map((p) => p.p95) },
+    { label: 'p99', data: serie.map((p) => p.p99) },
+    { label: 'max', data: serie.map((p) => p.max), borderDash: [5, 5] },
+  ] },
+  options: opciones('Tiempo de respuesta por ventana de 10 s', 'ms'),
+});
+new Chart(document.getElementById('rate'), {
+  type: 'line',
+  data: { labels: etiquetas, datasets: [{ label: 'http.request_rate', data: serie.map((p) => p.rate), fill: true }] },
+  options: opciones('Tasa de peticiones (calentamiento → saturación)', 'req/s'),
+});
+new Chart(document.getElementById('codes'), {
+  type: 'bar',
+  data: { labels: etiquetas, datasets: [
+    { label: '201 Created', data: serie.map((p) => p.c201) },
+    { label: '400 Bad Request (Zod)', data: serie.map((p) => p.c400) },
+  ] },
+  options: opciones('Códigos HTTP por ventana', 'respuestas'),
+});
+</script>
+</body>
+</html>
