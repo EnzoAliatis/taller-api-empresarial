@@ -6,5 +6,6 @@ const port = process.env.PORT ?? 3000;
 await connectDatabase(); // Conexión a la base de datos
 
 app.listen(port, () => {
-    console.log('Servidor escuchando en el puerto ' + port);
+    console.log("Ultimo cambio");
+    console.log('Servidor escuchando en el puerto ' + port );
 });
