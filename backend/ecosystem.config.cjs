@@ -25,7 +25,7 @@ module.exports = {
       ref: 'origin/main',
       repo: 'git@github.com:EnzoAliatis/taller-api-empresarial.git',
       path: '/var/www/taller-api',
-      'post-deploy': 'cd backend && mkdir -p ../../logs && npm install --include=dev && pm2 reload ecosystem.config.cjs --env production && pm2 save && curl -s -X POST -H "Content-type: application/json" --data "{\\"text\\":\\"🚀 taller-api-empresarial desplegado ($(git rev-parse --short HEAD))\\"}" $(cat ~/.slack_webhook)',
+      'post-deploy': 'cd backend && mkdir -p ../../logs && npm install --include=dev && pm2 reload ecosystem.config.cjs --env production && pm2 save && bash scripts/notificar-deploy.sh',
       ssh_options: "IdentityFile=~/.ssh/id_ed25519" // Ruta a tu llave .pem local
     }
   }
